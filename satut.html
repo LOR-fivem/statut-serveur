@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statut du Serveur Pterodactyl</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        #status {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 10px;
+        }
+        .status-online {
+            color: green;
+        }
+        .status-offline {
+            color: red;
+        }
+        .loading {
+            font-size: 1em;
+            color: #007bff;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Statut du Serveur Pterodactyl</h1>
+        <div id="status" class="loading">Chargement...</div>
+        <div class="footer">Powered by Pterodactyl API</div>
+    </div>
+
+    <script>
+        const apiKey = 'ptla_5coWdrXvIwo3SO7EGnkx3K2rDZqmH9n3UwiQqQ97CV8';
+        const serverUuid = '31788afc-c3fc-40ac-bd64-ae347a850171'; // UUID de ton serveur
+        const url = `http://217.145.72.26/api/client/servers/${serverUuid}/resources`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const statusEl = document.getElementById('status');
+            const serverState = data.attributes.current_state;
+            const resources = data.attributes.resources;
+
+            let statusText = '';
+
+            if (serverState === 'online') {
+                statusText = `🟢 Le serveur est en ligne.\n`;
+                statusEl.classList.add('status-online');
+            } else {
+                statusText = `🔴 Le serveur est hors ligne.\n`;
+                statusEl.classList.add('status-offline');
+            }
+
+            statusText += `\n**Ressources**:\n`;
+            statusText += `- Mémoire utilisée: ${resources.memory_bytes} octets\n`;
+            statusText += `- CPU utilisé: ${resources.cpu_absolute} unités\n`;
+            statusText += `- Espace disque utilisé: ${resources.disk_bytes} octets\n`;
+            statusText += `- Réseau RX: ${resources.network_rx_bytes} octets\n`;
+            statusText += `- Réseau TX: ${resources.network_tx_bytes} octets\n`;
+            statusText += `- Temps d'activité: ${resources.uptime} secondes\n`;
+
+            statusEl.innerText = statusText;
+            statusEl.classList.remove('loading');
+        })
+        .catch(error => {
+            document.getElementById('status').innerText = 'Erreur lors de la récupération des données.';
+            document.getElementById('status').classList.add('error');
+            console.error('Erreur:', error);
+        });
+    </script>
+</body>
+</html>
